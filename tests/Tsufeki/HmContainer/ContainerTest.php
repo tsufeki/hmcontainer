@@ -254,4 +254,13 @@ class ContainerTest extends TestCase
 
         $this->assertSame([42], $c->get('id'));
     }
+
+    public function test_sets_alias()
+    {
+        $c = new Container();
+        $c->setValue('x', 42);
+        $c->setAlias('y', 'x', true);
+
+        $this->assertSame([42], $c->get('y'));
+    }
 }

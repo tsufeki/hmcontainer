@@ -193,7 +193,6 @@ class Container implements MultiContainerInterface, LockableInterface
      *
      * @throws LockedException
      * @throws MixedMultiException
-     * @throws ParameterNotWiredException
      */
     public function setClass(string $class, bool $multi = false, string $realClass = null, array $manualDependencies = null)
     {
@@ -211,10 +210,24 @@ class Container implements MultiContainerInterface, LockableInterface
      *
      * @throws LockedException
      * @throws MixedMultiException
-     * @throws ParameterNotWiredException
      */
     public function setFunction(string $id, callable $function, bool $multi = false, array $manualDependencies = null)
     {
         return $this->set($id, new FunctionFactory(new Wiring(), $function, $manualDependencies), $multi);
+    }
+
+    /**
+     * @param string $id
+     * @param string $targetId
+     * @param bool $multi
+     *
+     * @return $this
+     *
+     * @throws LockedException
+     * @throws MixedMultiException
+     */
+    public function setAlias(string $id, string $targetId, bool $multi = false)
+    {
+        return $this->set($id, new AliasFactory($targetId), $multi);
     }
 }
