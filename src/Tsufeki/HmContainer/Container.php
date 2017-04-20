@@ -184,21 +184,6 @@ class Container implements MultiContainerInterface, LockableInterface
     }
 
     /**
-     * @param string $id
-     * @param callable $callable
-     * @param bool $multi
-     *
-     * @return $this
-     *
-     * @throws LockedException
-     * @throws MixedMultiException
-     */
-    public function setCallable(string $id, callable $callable, bool $multi = false)
-    {
-        return $this->set($id, new CallableFactory($callable), $multi);
-    }
-
-    /**
      * @param string $class
      * @param bool $multi
      * @param string|null $realClass

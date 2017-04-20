@@ -239,17 +239,6 @@ class ContainerTest extends TestCase
         $this->assertSame([53, 54], $c->get('y'));
     }
 
-    public function test_sets_from_callable()
-    {
-        $c = new Container();
-        $c->setCallable('id', function (ContainerInterface $cc) use ($c) {
-            $this->assertSame($c, $cc);
-            return 42;
-        }, true);
-
-        $this->assertSame([42], $c->get('id'));
-    }
-
     public function test_sets_class()
     {
         $c = new Container();
