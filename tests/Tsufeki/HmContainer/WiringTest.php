@@ -198,4 +198,14 @@ class WiringTest extends TestCase
 
         $this->assertSame(['stdClass'], $wiring->findDependencies($func));
     }
+
+    private function optionalParamMethod(\stdClass $x, $y = false, \Exception $e = null) { }
+
+    public function test_allows_unresolved_optional_parameters()
+    {
+        $wiring = new Wiring();
+        $func = new ReflectionMethod($this, 'optionalParamMethod');
+
+        $this->assertSame(['stdClass'], $wiring->findDependencies($func));
+    }
 }

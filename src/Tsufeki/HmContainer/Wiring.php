@@ -15,6 +15,8 @@ use phpDocumentor\Reflection\Types\Object_;
 class Wiring
 {
     const INJECT_TAG_REGEX = '~(?:^|\s)@Inject\\(\\s*"([^"]+)"\\s*\\)~';
+    const UNRESOLVED = -1;
+    const UNRESOLVED_OPTIONAL = -2;
 
     /**
      * @param ReflectionFunctionAbstract $function
@@ -29,13 +31,18 @@ class Wiring
         $dependencies = $this->parseDocTags($dependencies, $function);
 
         /* TODO: optional and variadic parameters */
+        $result = [];
         foreach ($dependencies as $name => $key) {
-            if ($key === false) {
+            if ($key === self::UNRESOLVED) {
                 throw new ParameterNotWiredException(null, $function, $name);
             }
+            if ($key === self::UNRESOLVED_OPTIONAL) {
+                break;
+            }
+            $result[] = $key;
         }
 
-        return array_values($dependencies);
+        return $result;
     }
 
     /**
@@ -49,7 +56,7 @@ class Wiring
 
         /** @var ReflectionParameter $param */
         foreach ($function->getParameters() as $param) {
-            $key = false;
+            $key = $param->isOptional() ? self::UNRESOLVED_OPTIONAL : self::UNRESOLVED;
             $type = $param->getType();
             if ($type !== null && !$type->isBuiltin()) {
                 $key = (string)$type;
