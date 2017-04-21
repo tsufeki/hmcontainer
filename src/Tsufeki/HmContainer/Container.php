@@ -32,6 +32,11 @@ class Container implements MultiContainerInterface, LockableInterface
     private $locked;
 
     /**
+     * @var int
+     */
+    private $recursionCounter;
+
+    /**
      * @param ContainerInterface|null $parent
      */
     public function __construct(ContainerInterface $parent = null)
@@ -41,6 +46,7 @@ class Container implements MultiContainerInterface, LockableInterface
         $this->factories = [];
         $this->multi = [];
         $this->locked = false;
+        $this->recursionCounter = 0;
     }
 
     public function lock()
@@ -66,19 +72,28 @@ class Container implements MultiContainerInterface, LockableInterface
     {
         $this->lock();
 
-        if (isset($this->values[$id])) {
-            return $this->values[$id];
+        if ($this->recursionCounter > count($this->factories)) {
+            throw new CircularDependencyException($id);
         }
+        $this->recursionCounter++;
 
-        if (isset($this->factories[$id])) {
-            return $this->values[$id] = $this->instantiate($id);
+        try {
+            if (isset($this->values[$id])) {
+                return $this->values[$id];
+            }
+
+            if (isset($this->factories[$id])) {
+                return $this->values[$id] = $this->instantiate($id);
+            }
+
+            if ($this->parent !== null) {
+                return $this->parent->get($id);
+            }
+
+            throw new NotFoundException($id);
+        } finally {
+            $this->recursionCounter--;
         }
-
-        if ($this->parent !== null) {
-            return $this->parent->get($id);
-        }
-
-        throw new NotFoundException($id);
     }
 
     /**

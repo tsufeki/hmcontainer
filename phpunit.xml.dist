@@ -8,6 +8,7 @@
          convertWarningsToExceptions="true"
          processIsolation="false"
          stopOnFailure="false"
+         beStrictAboutTestSize="true"
          bootstrap="vendor/autoload.php"
 >
     <testsuites>

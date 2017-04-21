@@ -7,6 +7,7 @@ use Psr\Container\ContainerInterface;
 
 /**
  * @covers Tsufeki\HmContainer\Container
+ * @covers Tsufeki\HmContainer\CircularDependencyException
  * @covers Tsufeki\HmContainer\LockedException
  * @covers Tsufeki\HmContainer\MixedMultiException
  * @covers Tsufeki\HmContainer\NotFoundException
@@ -262,5 +263,15 @@ class ContainerTest extends TestCase
         $c->setAlias('y', 'x', true);
 
         $this->assertSame([42], $c->get('y'));
+    }
+
+    public function test_throws_on_circular_dependency()
+    {
+        $c = new Container();
+        $c->setAlias('x', 'y');
+        $c->setAlias('y', 'x');
+
+        $this->expectException(CircularDependencyException::class);
+        $c->get('x');
     }
 }
