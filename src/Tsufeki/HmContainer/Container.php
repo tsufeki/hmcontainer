@@ -49,6 +49,17 @@ class Container implements MultiContainerInterface, LockableInterface
         $this->recursionCounter = 0;
     }
 
+    public function __sleep()
+    {
+        return ['parent', 'factories', 'multi', 'locked'];
+    }
+
+    public function __wakeup()
+    {
+        $this->values = [];
+        $this->recursionCounter = 0;
+    }
+
     public function lock()
     {
         $this->locked = true;

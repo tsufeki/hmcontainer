@@ -274,4 +274,23 @@ class ContainerTest extends TestCase
         $this->expectException(CircularDependencyException::class);
         $c->get('x');
     }
+
+    public function test_serializes_and_unserializes()
+    {
+        $c = new Container();
+        $c->setValue('x', 42);
+        $c->setClass('y', false, \stdClass::class);
+        $c->setAlias('z', 'x', true);
+        $oldObject = $c->get('y');
+
+        $serialized = serialize($c);
+        /** @var Container $cc */
+        $cc = unserialize($serialized);
+
+        $this->assertSame(42, $cc->get('x'));
+        $newObject = $cc->get('y');
+        $this->assertSame([42], $cc->get('z'));
+        $this->assertInstanceOf(\stdClass::class, $newObject);
+        $this->assertNotSame($oldObject, $newObject);
+    }
 }
