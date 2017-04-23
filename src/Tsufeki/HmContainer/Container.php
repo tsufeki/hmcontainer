@@ -3,6 +3,7 @@
 namespace Tsufeki\HmContainer;
 
 use Psr\Container\ContainerInterface;
+use Psr\Container\ContainerExceptionInterface;
 
 class Container implements MultiContainerInterface, LockableInterface
 {
@@ -79,8 +80,19 @@ class Container implements MultiContainerInterface, LockableInterface
             || ($this->parent !== null && $this->parent->has($id));
     }
 
+    /**
+     * @param string|Optional $id
+     *
+     * @return mixed
+     *
+     * @throws ContainerExceptionInterface
+     */
     public function get($id)
     {
+        if ($id instanceof Optional) {
+            return $this->getOrDefault($id->getId());
+        }
+
         $this->lock();
 
         if ($this->recursionCounter > count($this->factories)) {

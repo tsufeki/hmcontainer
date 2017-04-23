@@ -7,6 +7,7 @@ use Psr\Container\ContainerInterface;
 
 /**
  * @covers Tsufeki\HmContainer\Container
+ * @covers Tsufeki\HmContainer\Optional
  * @covers Tsufeki\HmContainer\CircularDependencyException
  * @covers Tsufeki\HmContainer\LockedException
  * @covers Tsufeki\HmContainer\MixedMultiException
@@ -292,5 +293,14 @@ class ContainerTest extends TestCase
         $this->assertSame([42], $cc->get('z'));
         $this->assertInstanceOf(\stdClass::class, $newObject);
         $this->assertNotSame($oldObject, $newObject);
+    }
+
+    public function test_optional_values()
+    {
+        $c = new Container();
+        $c->set('id', $this->makeFactory(42));
+
+        $this->assertSame(42, $c->get(new Optional('id')));
+        $this->assertNull($c->get(new Optional('non-existent-id')));
     }
 }
