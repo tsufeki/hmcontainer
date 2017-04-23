@@ -178,19 +178,20 @@ class Container implements MultiContainerInterface, LockableInterface
     /**
      * @param string $id
      * @param FactoryInterface $factory
-     * @param bool $multi
+     * @param array $options
      *
      * @return $this
      *
      * @throws LockedException
      * @throws MixedMultiException
      */
-    public function set(string $id, FactoryInterface $factory, bool $multi = false): self
+    public function set(string $id, FactoryInterface $factory, array $options = []): self
     {
         if ($this->isLocked()) {
             throw new LockedException();
         }
 
+        $multi = (bool)($options['multi'] ?? false);
         $currentMulti = $this->isMulti($id);
         if ($currentMulti !== null && $currentMulti !== $multi) {
             throw new MixedMultiException($id);
@@ -209,22 +210,22 @@ class Container implements MultiContainerInterface, LockableInterface
     /**
      * @param string $id
      * @param mixed $value
-     * @param bool $multi
+     * @param array $options
      *
      * @return $this
      *
      * @throws LockedException
      * @throws MixedMultiException
      */
-    public function setValue(string $id, $value, bool $multi = false): self
+    public function setValue(string $id, $value, array $options = []): self
     {
-        return $this->set($id, new ValueFactory($value), $multi);
+        return $this->set($id, new ValueFactory($value), $options);
     }
 
     /**
      * @param string $class
-     * @param bool $multi
      * @param string|null $realClass
+     * @param array $options
      * @param array|null $manualDependencies
      *
      * @return $this
@@ -232,16 +233,16 @@ class Container implements MultiContainerInterface, LockableInterface
      * @throws LockedException
      * @throws MixedMultiException
      */
-    public function setClass(string $class, bool $multi = false, string $realClass = null, array $manualDependencies = null): self
+    public function setClass(string $class, string $realClass = null, array $options = [], array $manualDependencies = null): self
     {
         $realClass = $realClass ?: $class;
-        return $this->set($class, new ClassFactory(new Wiring(), $realClass, $manualDependencies), $multi);
+        return $this->set($class, new ClassFactory(new Wiring(), $realClass, $manualDependencies), $options);
     }
 
     /**
      * @param string $id
      * @param callable $function
-     * @param bool $multi
+     * @param array $options
      * @param array|null $manualDependencies
      *
      * @return $this
@@ -249,23 +250,23 @@ class Container implements MultiContainerInterface, LockableInterface
      * @throws LockedException
      * @throws MixedMultiException
      */
-    public function setFunction(string $id, callable $function, bool $multi = false, array $manualDependencies = null): self
+    public function setFunction(string $id, callable $function, array $options = [], array $manualDependencies = null): self
     {
-        return $this->set($id, new FunctionFactory(new Wiring(), $function, $manualDependencies), $multi);
+        return $this->set($id, new FunctionFactory(new Wiring(), $function, $manualDependencies), $options);
     }
 
     /**
      * @param string $id
      * @param string $targetId
-     * @param bool $multi
+     * @param array $options
      *
      * @return $this
      *
      * @throws LockedException
      * @throws MixedMultiException
      */
-    public function setAlias(string $id, string $targetId, bool $multi = false): self
+    public function setAlias(string $id, string $targetId, array $options = []): self
     {
-        return $this->set($id, new AliasFactory($targetId), $multi);
+        return $this->set($id, new AliasFactory($targetId), $options);
     }
 }

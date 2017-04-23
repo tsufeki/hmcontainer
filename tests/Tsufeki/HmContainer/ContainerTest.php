@@ -172,8 +172,8 @@ class ContainerTest extends TestCase
     public function test_gets_multi_values()
     {
         $c = new Container();
-        $c->set('id', $this->makeFactory(42), true);
-        $c->set('id', $this->makeFactory(53), true);
+        $c->set('id', $this->makeFactory(42), ['multi' => true]);
+        $c->set('id', $this->makeFactory(53), ['multi' => true]);
 
         $this->assertTrue($c->has('id'));
         $this->assertTrue($c->isMulti('id'));
@@ -185,10 +185,10 @@ class ContainerTest extends TestCase
         $c = new Container();
         $factory1 = $this->makeFactory(0, false);
         $factory2 = $this->makeFactory(0, false);
-        $c->set('id', $factory1, false);
+        $c->set('id', $factory1, ['multi' => false]);
 
         $this->expectException(MixedMultiException::class);
-        $c->set('id', $factory2, true);
+        $c->set('id', $factory2, ['multi' => true]);
     }
 
     public function test_throws_when_mixed_multi_modes_2()
@@ -196,10 +196,10 @@ class ContainerTest extends TestCase
         $c = new Container();
         $factory1 = $this->makeFactory(0, false);
         $factory2 = $this->makeFactory(0, false);
-        $c->set('id', $factory1, true);
+        $c->set('id', $factory1, ['multi' => true]);
 
         $this->expectException(MixedMultiException::class);
-        $c->set('id', $factory2, false);
+        $c->set('id', $factory2, ['multi' => false]);
     }
 
     public function test_merges_multi_with_parent()
@@ -222,8 +222,8 @@ class ContainerTest extends TestCase
             ->willReturn(true);
 
         $c = new Container($parent);
-        $c->set('id', $this->makeFactory(53), true);
-        $c->set('id', $this->makeFactory(54), true);
+        $c->set('id', $this->makeFactory(53), ['multi' => true]);
+        $c->set('id', $this->makeFactory(54), ['multi' => true]);
 
         $this->assertTrue($c->has('id'));
         $this->assertTrue($c->isMulti('id'));
@@ -234,8 +234,8 @@ class ContainerTest extends TestCase
     {
         $c = new Container();
         $c->setValue('x', 42);
-        $c->setValue('y', 53, true);
-        $c->setValue('y', 54, true);
+        $c->setValue('y', 53, ['multi' => true]);
+        $c->setValue('y', 54, ['multi' => true]);
 
         $this->assertSame(42, $c->get('x'));
         $this->assertSame([53, 54], $c->get('y'));
@@ -244,7 +244,7 @@ class ContainerTest extends TestCase
     public function test_sets_class()
     {
         $c = new Container();
-        $c->setClass('id', true, \stdClass::class);
+        $c->setClass('id', \stdClass::class, ['multi' => true]);
 
         $this->assertInstanceOf(\stdClass::class, $c->get('id')[0]);
     }
@@ -252,7 +252,7 @@ class ContainerTest extends TestCase
     public function test_sets_from_function()
     {
         $c = new Container();
-        $c->setFunction('id', function () { return 42; }, true);
+        $c->setFunction('id', function () { return 42; }, ['multi' => true]);
 
         $this->assertSame([42], $c->get('id'));
     }
@@ -261,7 +261,7 @@ class ContainerTest extends TestCase
     {
         $c = new Container();
         $c->setValue('x', 42);
-        $c->setAlias('y', 'x', true);
+        $c->setAlias('y', 'x', ['multi' => true]);
 
         $this->assertSame([42], $c->get('y'));
     }
@@ -280,8 +280,8 @@ class ContainerTest extends TestCase
     {
         $c = new Container();
         $c->setValue('x', 42);
-        $c->setClass('y', false, \stdClass::class);
-        $c->setAlias('z', 'x', true);
+        $c->setClass('y', \stdClass::class, ['multi' => false]);
+        $c->setAlias('z', 'x', ['multi' => true]);
         $oldObject = $c->get('y');
 
         $serialized = serialize($c);

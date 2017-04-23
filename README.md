@@ -46,9 +46,9 @@ be added afterwards.
 Add multiple items to be retrieved as an array:
 
 ```php
-$c->setValue("primes", 2, true);
-$c->setValue("primes", 3, true);
-$c->setValue("primes", 5, true);
+$c->setValue("primes", 2, ['multi' => true]);
+$c->setValue("primes", 3, ['multi' => true]);
+$c->setValue("primes", 5, ['multi' => true]);
 $c->isMulti("primes"); // true
 $c->get("primes"); // [2, 3, 5]
 ```
@@ -58,7 +58,7 @@ $c->get("primes"); // [2, 3, 5]
 Add a class which will be instantiated once, during first `get()`:
 
 ```php
-$c->setClass("aobject", false, AClass::class, ["dep1", "dep2"]);
+$c->setClass("aobject", AClass::class, [], ["dep1", "dep2"]);
 $c->get("aobject"); // returns new AClass($c->get("dep1"), $c->get("dep2"))
 $c->get("aobject"); // returns the same instance as above
 ```
@@ -99,8 +99,8 @@ class Aggregator {
   public function __construct(array $impls) { }
 }
 
-$c->setClass(SomeInterface::class, true, ConcreteImplementation1::class);
-$c->setClass(SomeInterface::class, true, ConcreteImplementation2::class);
+$c->setClass(SomeInterface::class, ConcreteImplementation1::class, ['multi' => true]);
+$c->setClass(SomeInterface::class, ConcreteImplementation2::class, ['multi' => true]);
 $c->setClass(Aggregator::class);
 $c->get(Aggregator::class);
 ```
@@ -121,7 +121,7 @@ Mix manual dependencies and autowiring by putting some `null`s in dependency
 array:
 
 ```php
-$c->setClass(DClass::class, false, null, [null, "dep2"]);
+$c->setClass(DClass::class, null, [], [null, "dep2"]);
 ```
 
 ### Aliases
@@ -163,3 +163,4 @@ Container can be serialized and unserialized for caching with standard PHP
 License
 -------
 MIT - see [LICENCE](LICENSE).
+
