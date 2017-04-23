@@ -21,19 +21,24 @@ class Wiring
 
     /**
      * @param ReflectionFunctionAbstract $function
+     * @param array $manualDependencies
      *
      * @return string[] Dependency injection keys for each parameter.
      *
      * @throws ParameterNotWiredException
      */
-    public function findDependencies(ReflectionFunctionAbstract $function): array
+    public function findDependencies(ReflectionFunctionAbstract $function, array $manualDependencies = []): array
     {
         $dependencies = $this->getParameters($function);
         $dependencies = $this->parseDocTags($dependencies, $function);
 
         /* TODO: optional and variadic parameters */
         $result = [];
+        $i = 0;
         foreach ($dependencies as $name => $key) {
+            $key = $manualDependencies[$i] ?? $key;
+            $i++;
+
             if ($key === self::UNRESOLVED) {
                 throw new ParameterNotWiredException(null, $function, $name);
             }

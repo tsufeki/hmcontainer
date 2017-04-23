@@ -230,4 +230,14 @@ class WiringTest extends TestCase
         $this->assertSame('Exception', $deps[1]->getId());
         $this->assertSame('zkey', $deps[2]->getId());
     }
+
+    private function partialTypesMethod(\stdClass $x, \Exception $y) { }
+
+    public function test_resolves_partial_manual_dependencies()
+    {
+        $wiring = new Wiring();
+        $func = new ReflectionMethod($this, 'partialTypesMethod');
+
+        $this->assertSame(['stdClass', 'ykey'], $wiring->findDependencies($func, [null, 'ykey']));
+    }
 }

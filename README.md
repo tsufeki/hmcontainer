@@ -117,6 +117,13 @@ class Maybe {
 }
 ```
 
+Mix manual dependencies and autowiring by putting some `null`s in dependency
+array:
+
+```php
+$c->setClass(DClass::class, false, null, [null, "dep2"]);
+```
+
 ### Aliases
 
 Add an alias to other key:

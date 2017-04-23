@@ -29,23 +29,27 @@ class ClassFactory implements FactoryInterface
     public function __construct(Wiring $wiring, string $class, array $dependencies = null)
     {
         $this->class = $class;
-        $this->dependencies = $dependencies ?? $this->findDependencies($wiring);
+        if ($dependencies === null || in_array(null, $dependencies, true)) {
+            $dependencies = $this->findDependencies($wiring, $dependencies ?? []);
+        }
+        $this->dependencies = $dependencies;
     }
 
     /**
      * @param Wiring $wiring
+     * @param array $manualDependencies
      *
      * @return string[]
      *
      * @throws ParameterNotWiredException
      */
-    private function findDependencies(Wiring $wiring): array
+    private function findDependencies(Wiring $wiring, array $manualDependencies): array
     {
         try {
             $reflectionClass = new ReflectionClass($this->class);
             $constructor = $reflectionClass->getConstructor();
 
-            return $constructor !== null ? $wiring->findDependencies($constructor) : [];
+            return $constructor !== null ? $wiring->findDependencies($constructor, $manualDependencies) : [];
         } catch (ReflectionException $e) {
             throw new ParameterNotWiredException($e->getMessage());
         }
