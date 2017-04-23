@@ -25,7 +25,7 @@ class Wiring
      *
      * @throws ParameterNotWiredException
      */
-    public function findDependencies(ReflectionFunctionAbstract $function)
+    public function findDependencies(ReflectionFunctionAbstract $function): array
     {
         $dependencies = $this->getParameters($function);
         $dependencies = $this->parseDocTags($dependencies, $function);
@@ -50,7 +50,7 @@ class Wiring
      *
      * @return array
      */
-    private function getParameters(ReflectionFunctionAbstract $function)
+    private function getParameters(ReflectionFunctionAbstract $function): array
     {
         $dependencies = [];
 
@@ -73,7 +73,7 @@ class Wiring
      *
      * @return array
      */
-    private function parseDocTags(array $dependencies, ReflectionFunctionAbstract $function)
+    private function parseDocTags(array $dependencies, ReflectionFunctionAbstract $function): array
     {
         if (!$function->getDocComment()) {
             return $dependencies;
