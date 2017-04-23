@@ -83,10 +83,8 @@ class ClassFactoryTest extends TestCase
         $wiring = $this->createMock(Wiring::class);
         $c = $this->createMock(ContainerInterface::class);
 
-        $classFactory = new ClassFactory($wiring, 'NonExistentClass');
-
         $this->expectException(ParameterNotWiredException::class);
-        $classFactory->create($c);
+        $classFactory = new ClassFactory($wiring, 'NonExistentClass');
     }
 }
 

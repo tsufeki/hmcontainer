@@ -19,11 +19,6 @@ class FunctionFactory implements FactoryInterface
     private $dependencies;
 
     /**
-     * @var Wiring
-     */
-    private $wiring;
-
-    /**
      * @param Wiring $wiring
      * @param callable $function
      * @param array|null $dependencies Ids of services to be injected to the constructor.
@@ -34,27 +29,28 @@ class FunctionFactory implements FactoryInterface
     public function __construct(Wiring $wiring, callable $function, array $dependencies = null)
     {
         $this->function = $function;
-        $this->dependencies = $dependencies;
-        $this->wiring = $wiring;
+        $this->dependencies = $dependencies ?? $this->findDependencies($wiring);
     }
 
     /**
+     * @param Wiring $wiring
+     *
+     * @return string[]
+     *
      * @throws ParameterNotWiredException
      */
-    private function findDependencies()
+    private function findDependencies(Wiring $wiring): array
     {
         // callable typehint in constructor ensures there won't be a ReflectionException here
         $reflectionFunction = is_array($this->function)
             ? new ReflectionMethod($this->function[0], $this->function[1])
             : new ReflectionFunction($this->function);
-        $this->dependencies = $this->wiring->findDependencies($reflectionFunction);
+
+        return $wiring->findDependencies($reflectionFunction);
     }
 
     public function create(ContainerInterface $container)
     {
-        if ($this->dependencies === null) {
-            $this->findDependencies();
-        }
         $args = [];
         foreach ($this->dependencies as $dep) {
             $args[] = $container->get($dep);
