@@ -303,4 +303,12 @@ class ContainerTest extends TestCase
         $this->assertSame(42, $c->get(new Optional('id')));
         $this->assertNull($c->get(new Optional('non-existent-id')));
     }
+
+    public function test_adds_lazy_item()
+    {
+        $c = new Container();
+        $c->set('id', $this->makeFactory(42), ['lazy' => true]);
+
+        $this->assertSame(42, $c->get('id')());
+    }
 }

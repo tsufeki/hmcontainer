@@ -178,7 +178,7 @@ class Container implements MultiContainerInterface, LockableInterface
     /**
      * @param string $id
      * @param FactoryInterface $factory
-     * @param array $options
+     * @param array $options Available options: 'multi', 'lazy'.
      *
      * @return $this
      *
@@ -189,6 +189,10 @@ class Container implements MultiContainerInterface, LockableInterface
     {
         if ($this->isLocked()) {
             throw new LockedException();
+        }
+
+        if ($options['lazy'] ?? false) {
+            $factory = new LazyFactory($factory);
         }
 
         $multi = (bool)($options['multi'] ?? false);

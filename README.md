@@ -133,6 +133,15 @@ $c->setAlias("alias", "target");
 $c->get("alias"); // same as $c->get("target")
 ```
 
+### Lazy items
+
+Add a lazy item with `'lazy'` option, it will return parameterless callable:
+
+```php
+$c->setValue('lazy', 42, ['lazy' => true]);
+$c->get('lazy'); // a callable $f such that $f() === 42
+```
+
 ### Container hierarchy
 
 Create a child container:
@@ -158,7 +167,7 @@ $c->set("mykey", $myFactory);
 ### Serialization
 
 Container can be serialized and unserialized for caching with standard PHP
-`serialize()` and `unserialize()`.
+`serialize()` and `unserialize()`, but only if you use serializable factories.
 
 License
 -------
