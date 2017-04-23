@@ -15,6 +15,7 @@ use phpDocumentor\Reflection\Types\Object_;
 class Wiring
 {
     const INJECT_TAG_REGEX = '~(?:^|\s)@Inject\\(\\s*"([^"]+)"\\s*\\)~';
+    const OPTIONAL_TAG_REGEX = '~(?:^|\s)@Optional(?:\\s|$|\\(\\s*\\))~';
     const UNRESOLVED = -1;
     const UNRESOLVED_OPTIONAL = -2;
 
@@ -100,8 +101,13 @@ class Wiring
                 }
             }
 
-            if (preg_match(static::INJECT_TAG_REGEX, (string)$paramTag->getDescription(), $matches)) {
+            $paramDescription = (string)$paramTag->getDescription();
+            if (preg_match(static::INJECT_TAG_REGEX, $paramDescription, $matches)) {
                 $dependencies[$name] = $matches[1];
+            }
+
+            if (preg_match(static::OPTIONAL_TAG_REGEX, $paramDescription)) {
+                $dependencies[$name] = new Optional($dependencies[$name]);
             }
         }
 

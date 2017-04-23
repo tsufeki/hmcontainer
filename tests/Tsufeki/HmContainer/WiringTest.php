@@ -208,4 +208,26 @@ class WiringTest extends TestCase
 
         $this->assertSame(['stdClass'], $wiring->findDependencies($func));
     }
+
+    /**
+     * @param \stdClass $x @Optional
+     * @param $y @Optional()
+     * @param $z @Optional @Inject("zkey")
+     */
+    private function optionalTagsMethod($x, \Exception $y, $z) { }
+
+    public function test_recognizes_optional_tag()
+    {
+        $wiring = new Wiring();
+        $func = new ReflectionMethod($this, 'optionalTagsMethod');
+
+        /** @var Optional[] $deps */
+        $deps = $wiring->findDependencies($func);
+
+        $this->assertContainsOnlyInstancesOf(Optional::class, $deps);
+        $this->assertCount(3, $deps);
+        $this->assertSame('stdClass', $deps[0]->getId());
+        $this->assertSame('Exception', $deps[1]->getId());
+        $this->assertSame('zkey', $deps[2]->getId());
+    }
 }

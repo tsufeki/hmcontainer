@@ -105,6 +105,18 @@ $c->setClass(Aggregator::class);
 $c->get(Aggregator::class);
 ```
 
+Mark parameter with `@Optional` to have `null` injected when dependency can't
+be found:
+
+```php
+class Maybe {
+  /**
+   * @param $dep @Optional
+   */
+  public function __construct(Dep $dep = null) { }
+}
+```
+
 ### Aliases
 
 Add an alias to other key:
