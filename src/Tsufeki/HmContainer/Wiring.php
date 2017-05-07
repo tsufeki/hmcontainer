@@ -2,15 +2,14 @@
 
 namespace Tsufeki\HmContainer;
 
-use ReflectionException;
-use ReflectionFunctionAbstract;
-use ReflectionParameter;
-use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\DocBlock\Tags\Param;
+use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\ContextFactory;
 use phpDocumentor\Reflection\Types\Object_;
+use ReflectionFunctionAbstract;
+use ReflectionParameter;
 
 class Wiring
 {
@@ -21,7 +20,7 @@ class Wiring
 
     /**
      * @param ReflectionFunctionAbstract $function
-     * @param array $manualDependencies
+     * @param array                      $manualDependencies
      *
      * @return string[] Dependency injection keys for each parameter.
      *
@@ -74,7 +73,7 @@ class Wiring
     }
 
     /**
-     * @param array $dependencies
+     * @param array                      $dependencies
      * @param ReflectionFunctionAbstract $function
      *
      * @return array
@@ -95,7 +94,7 @@ class Wiring
                 continue;
             }
 
-            /** @var Type|Object_|Array_ $type */
+            /** @var Type|Object_|Array_|null $type */
             $type = $paramTag->getType();
             if ($type !== null) {
                 if ($type instanceof Array_) {

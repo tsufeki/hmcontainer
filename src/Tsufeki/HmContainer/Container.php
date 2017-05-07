@@ -2,8 +2,8 @@
 
 namespace Tsufeki\HmContainer;
 
-use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
 
 class Container implements MultiContainerInterface, LockableInterface
 {
@@ -121,7 +121,7 @@ class Container implements MultiContainerInterface, LockableInterface
 
     /**
      * @param string $id
-     * @param mixed $default
+     * @param mixed  $default
      *
      * @return mixed
      */
@@ -144,7 +144,7 @@ class Container implements MultiContainerInterface, LockableInterface
     private function instantiate($id)
     {
         $value = [];
-        foreach($this->factories[$id] as $factory) {
+        foreach ($this->factories[$id] as $factory) {
             $value[] = $factory->create($this);
         }
 
@@ -169,6 +169,7 @@ class Container implements MultiContainerInterface, LockableInterface
             if ($this->parent instanceof MultiContainerInterface) {
                 return $this->parent->isMulti($id);
             }
+
             return $this->parent->has($id) ? false : null;
         }
 
@@ -176,9 +177,9 @@ class Container implements MultiContainerInterface, LockableInterface
     }
 
     /**
-     * @param string $id
+     * @param string           $id
      * @param FactoryInterface $factory
-     * @param array $options Available options: 'multi', 'lazy'.
+     * @param array            $options Available options: 'multi', 'lazy'.
      *
      * @return $this
      *
@@ -213,8 +214,8 @@ class Container implements MultiContainerInterface, LockableInterface
 
     /**
      * @param string $id
-     * @param mixed $value
-     * @param array $options
+     * @param mixed  $value
+     * @param array  $options
      *
      * @return $this
      *
@@ -227,10 +228,10 @@ class Container implements MultiContainerInterface, LockableInterface
     }
 
     /**
-     * @param string $class
+     * @param string      $class
      * @param string|null $realClass
-     * @param array $options
-     * @param array|null $manualDependencies
+     * @param array       $options
+     * @param array|null  $manualDependencies
      *
      * @return $this
      *
@@ -240,13 +241,14 @@ class Container implements MultiContainerInterface, LockableInterface
     public function setClass(string $class, string $realClass = null, array $options = [], array $manualDependencies = null): self
     {
         $realClass = $realClass ?: $class;
+
         return $this->set($class, new ClassFactory(new Wiring(), $realClass, $manualDependencies), $options);
     }
 
     /**
-     * @param string $id
-     * @param callable $function
-     * @param array $options
+     * @param string     $id
+     * @param callable   $function
+     * @param array      $options
      * @param array|null $manualDependencies
      *
      * @return $this
@@ -262,7 +264,7 @@ class Container implements MultiContainerInterface, LockableInterface
     /**
      * @param string $id
      * @param string $targetId
-     * @param array $options
+     * @param array  $options
      *
      * @return $this
      *

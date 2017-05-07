@@ -19,8 +19,8 @@ class ClassFactory implements FactoryInterface
     private $dependencies;
 
     /**
-     * @param Wiring $wiring
-     * @param string $class
+     * @param Wiring     $wiring
+     * @param string     $class
      * @param array|null $dependencies Ids of services to be injected to the constructor.
      *                                 If not provided, they are guessed from typehints.
      *
@@ -37,7 +37,7 @@ class ClassFactory implements FactoryInterface
 
     /**
      * @param Wiring $wiring
-     * @param array $manualDependencies
+     * @param array  $manualDependencies
      *
      * @return string[]
      *

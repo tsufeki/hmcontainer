@@ -7,8 +7,8 @@ use ReflectionFunction;
 use ReflectionMethod;
 
 /**
- * @covers Tsufeki\HmContainer\Wiring
- * @covers Tsufeki\HmContainer\ParameterNotWiredException
+ * @covers \Tsufeki\HmContainer\Wiring
+ * @covers \Tsufeki\HmContainer\ParameterNotWiredException
  */
 class WiringTest extends TestCase
 {
@@ -23,7 +23,7 @@ class WiringTest extends TestCase
     }
 
     /**
-     * @param \stdClass $x
+     * @param \stdClass  $x
      * @param \Exception $e
      *
      * @return void
@@ -65,7 +65,7 @@ class WiringTest extends TestCase
     }
 
     /**
-     * @param \stdClass $x @Inject("xkey")
+     * @param \stdClass  $x @Inject("xkey")
      * @param \Exception $e @Inject("ekey")
      */
     private function injectTagMethod($x, $e) { }

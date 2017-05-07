@@ -6,12 +6,12 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 /**
- * @covers Tsufeki\HmContainer\Container
- * @covers Tsufeki\HmContainer\Optional
- * @covers Tsufeki\HmContainer\CircularDependencyException
- * @covers Tsufeki\HmContainer\LockedException
- * @covers Tsufeki\HmContainer\MixedMultiException
- * @covers Tsufeki\HmContainer\NotFoundException
+ * @covers \Tsufeki\HmContainer\Container
+ * @covers \Tsufeki\HmContainer\Optional
+ * @covers \Tsufeki\HmContainer\CircularDependencyException
+ * @covers \Tsufeki\HmContainer\LockedException
+ * @covers \Tsufeki\HmContainer\MixedMultiException
+ * @covers \Tsufeki\HmContainer\NotFoundException
  */
 class ContainerTest extends TestCase
 {

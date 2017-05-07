@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 /**
- * @covers Tsufeki\HmContainer\AliasFactory
+ * @covers \Tsufeki\HmContainer\AliasFactory
  */
 class AliasFactoryTest extends TestCase
 {

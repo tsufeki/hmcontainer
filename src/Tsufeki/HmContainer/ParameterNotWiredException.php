@@ -9,9 +9,9 @@ use ReflectionMethod;
 class ParameterNotWiredException extends \Exception implements ContainerExceptionInterface
 {
     /**
-     * @param string|null $msg
+     * @param string|null                     $msg
      * @param ReflectionFunctionAbstract|null $function
-     * @param string|null $parameter
+     * @param string|null                     $parameter
      */
     public function __construct(string $msg = null, ReflectionFunctionAbstract $function = null, string $parameter = null)
     {

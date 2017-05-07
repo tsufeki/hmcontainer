@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 /**
- * @covers Tsufeki\HmContainer\FunctionFactory
+ * @covers \Tsufeki\HmContainer\FunctionFactory
  */
 class FunctionFactoryTest extends TestCase
 {

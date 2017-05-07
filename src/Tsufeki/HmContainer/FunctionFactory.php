@@ -3,8 +3,8 @@
 namespace Tsufeki\HmContainer;
 
 use Psr\Container\ContainerInterface;
-use ReflectionMethod;
 use ReflectionFunction;
+use ReflectionMethod;
 
 class FunctionFactory implements FactoryInterface
 {
@@ -19,8 +19,8 @@ class FunctionFactory implements FactoryInterface
     private $dependencies;
 
     /**
-     * @param Wiring $wiring
-     * @param callable $function
+     * @param Wiring     $wiring
+     * @param callable   $function
      * @param array|null $dependencies Ids of services to be injected to the constructor.
      *                                 If not provided, they are guessed from typehints.
      *

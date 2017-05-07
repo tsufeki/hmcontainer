@@ -11,6 +11,6 @@ class CircularDependencyException extends \Exception implements ContainerExcepti
      */
     public function __construct(string $id = null)
     {
-        parent::__construct(sprintf("Circular dependency detected while resolving %s", $id));
+        parent::__construct(sprintf('Circular dependency detected while resolving %s', $id));
     }
 }

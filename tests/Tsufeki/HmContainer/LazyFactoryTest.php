@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 /**
- * @covers Tsufeki\HmContainer\LazyFactory
+ * @covers \Tsufeki\HmContainer\LazyFactory
  */
 class LazyFactoryTest extends TestCase
 {

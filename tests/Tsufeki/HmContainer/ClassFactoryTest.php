@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 /**
- * @covers Tsufeki\HmContainer\ClassFactory
+ * @covers \Tsufeki\HmContainer\ClassFactory
  */
 class ClassFactoryTest extends TestCase
 {
@@ -92,7 +92,8 @@ class ClassWithContructor
 {
     public $args;
 
-    public function __construct(...$args) {
+    public function __construct(...$args)
+    {
         $this->args = $args;
     }
 }
