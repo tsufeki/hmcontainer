@@ -90,7 +90,7 @@ class Container implements MultiContainerInterface, LockableInterface
     public function get($id)
     {
         if ($id instanceof Optional) {
-            return $this->getOrDefault($id->getId());
+            return $this->getOrDefault($id->getId(), $id->getDefault());
         }
 
         $this->lock();

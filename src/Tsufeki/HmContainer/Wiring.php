@@ -96,9 +96,11 @@ class Wiring
 
             /** @var Type|Object_|Array_|null $type */
             $type = $paramTag->getType();
+            $isArray = false;
             if ($type !== null) {
                 if ($type instanceof Array_) {
                     $type = $type->getValueType();
+                    $isArray = true;
                 }
                 if ($type instanceof Object_ && $type->getFqsen()) {
                     $dependencies[$name] = ltrim((string)$type->getFqsen(), '\\');
@@ -110,8 +112,12 @@ class Wiring
                 $dependencies[$name] = $matches[1];
             }
 
-            if (preg_match(static::OPTIONAL_TAG_REGEX, $paramDescription)) {
-                $dependencies[$name] = new Optional($dependencies[$name]);
+            if (in_array($dependencies[$name], [self::UNRESOLVED, self::UNRESOLVED_OPTIONAL])) {
+                continue;
+            }
+
+            if ($isArray || preg_match(static::OPTIONAL_TAG_REGEX, $paramDescription)) {
+                $dependencies[$name] = new Optional($dependencies[$name], $isArray ? [] : null);
             }
         }
 

@@ -10,11 +10,18 @@ class Optional
     private $id;
 
     /**
-     * @param string $id
+     * @var mixed
      */
-    public function __construct(string $id)
+    private $default;
+
+    /**
+     * @param string $id
+     * @param mixed  $default
+     */
+    public function __construct(string $id, $default = null)
     {
         $this->id = $id;
+        $this->default = $default;
     }
 
     /**
@@ -23,5 +30,13 @@ class Optional
     public function getId(): string
     {
         return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefault()
+    {
+        return $this->default;
     }
 }

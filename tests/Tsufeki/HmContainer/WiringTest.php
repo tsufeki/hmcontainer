@@ -48,7 +48,7 @@ class WiringTest extends TestCase
         $wiring = new Wiring();
         $func = new ReflectionMethod($this, 'arrayDocBlockMethod');
 
-        $this->assertSame(['stdClass'], $wiring->findDependencies($func));
+        $this->assertEquals([new Optional('stdClass', [])], $wiring->findDependencies($func));
     }
 
     /**
@@ -239,5 +239,19 @@ class WiringTest extends TestCase
         $func = new ReflectionMethod($this, 'partialTypesMethod');
 
         $this->assertSame(['stdClass', 'ykey'], $wiring->findDependencies($func, [null, 'ykey']));
+    }
+
+    /**
+     * @param int $x @Optional
+     */
+    private function optionalIntMethod($x) { }
+
+    public function test_throws_on_unrecognized_param_with_optional_tag()
+    {
+        $wiring = new Wiring();
+        $func = new ReflectionMethod($this, 'optionalIntMethod');
+
+        $this->expectException(ParameterNotWiredException::class);
+        $wiring->findDependencies($func);
     }
 }
