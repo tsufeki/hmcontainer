@@ -15,13 +15,17 @@ class ParameterNotWiredException extends \Exception implements ContainerExceptio
      */
     public function __construct(string $msg = null, ReflectionFunctionAbstract $function = null, string $parameter = null)
     {
-        if (!$msg && ($function || $parameter)) {
-            $msg = sprintf(
-                'Can\'t wire parameter $%s of %s()',
-                $parameter,
-                $this->formatFunction($function)
-            );
+        if ($msg === null) {
+            $msg = 'Can\'t wire parameter';
+            if ($function !== null) {
+                $msg .= sprintf(
+                    '%s of %s()',
+                    $parameter ? ' $' . $parameter : '',
+                    $this->formatFunction($function)
+                );
+            }
         }
+
         parent::__construct($msg);
     }
 
