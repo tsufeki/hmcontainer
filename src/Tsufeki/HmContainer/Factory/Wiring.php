@@ -1,6 +1,6 @@
 <?php
 
-namespace Tsufeki\HmContainer;
+namespace Tsufeki\HmContainer\Factory;
 
 use phpDocumentor\Reflection\DocBlock\Tags\Param;
 use phpDocumentor\Reflection\DocBlockFactory;
@@ -10,6 +10,8 @@ use phpDocumentor\Reflection\Types\ContextFactory;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionFunctionAbstract;
 use ReflectionParameter;
+use Tsufeki\HmContainer\Exception\ParameterNotWiredException;
+use Tsufeki\HmContainer\Optional;
 
 class Wiring
 {

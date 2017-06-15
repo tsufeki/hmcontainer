@@ -1,12 +1,12 @@
 <?php
 
-namespace Tsufeki\HmContainer;
+namespace Tsufeki\HmContainer\Factory;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 /**
- * @covers \Tsufeki\HmContainer\ValueFactory
+ * @covers \Tsufeki\HmContainer\Factory\ValueFactory
  */
 class ValueFactoryTest extends TestCase
 {

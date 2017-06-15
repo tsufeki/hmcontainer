@@ -1,12 +1,13 @@
 <?php
 
-namespace Tsufeki\HmContainer;
+namespace Tsufeki\HmContainer\Factory;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Tsufeki\HmContainer\FactoryInterface;
 
 /**
- * @covers \Tsufeki\HmContainer\LazyFactory
+ * @covers \Tsufeki\HmContainer\Factory\LazyFactory
  */
 class LazyFactoryTest extends TestCase
 {

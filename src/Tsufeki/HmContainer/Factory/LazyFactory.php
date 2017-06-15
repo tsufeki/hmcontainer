@@ -1,8 +1,9 @@
 <?php
 
-namespace Tsufeki\HmContainer;
+namespace Tsufeki\HmContainer\Factory;
 
 use Psr\Container\ContainerInterface;
+use Tsufeki\HmContainer\FactoryInterface;
 
 class LazyFactory implements FactoryInterface
 {

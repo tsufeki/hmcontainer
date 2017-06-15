@@ -1,10 +1,12 @@
 <?php
 
-namespace Tsufeki\HmContainer;
+namespace Tsufeki\HmContainer\Factory;
 
 use Psr\Container\ContainerInterface;
 use ReflectionFunction;
 use ReflectionMethod;
+use Tsufeki\HmContainer\Exception\ParameterNotWiredException;
+use Tsufeki\HmContainer\FactoryInterface;
 
 class FunctionFactory implements FactoryInterface
 {

@@ -1,14 +1,16 @@
 <?php
 
-namespace Tsufeki\HmContainer;
+namespace Tsufeki\HmContainer\Factory;
 
 use PHPUnit\Framework\TestCase;
 use ReflectionFunction;
 use ReflectionMethod;
+use Tsufeki\HmContainer\Exception\ParameterNotWiredException;
+use Tsufeki\HmContainer\Optional;
 
 /**
- * @covers \Tsufeki\HmContainer\Wiring
- * @covers \Tsufeki\HmContainer\ParameterNotWiredException
+ * @covers \Tsufeki\HmContainer\Factory\Wiring
+ * @covers \Tsufeki\HmContainer\Exception\ParameterNotWiredException
  */
 class WiringTest extends TestCase
 {

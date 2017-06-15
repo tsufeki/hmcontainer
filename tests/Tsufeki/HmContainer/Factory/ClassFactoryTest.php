@@ -1,12 +1,13 @@
 <?php
 
-namespace Tsufeki\HmContainer;
+namespace Tsufeki\HmContainer\Factory;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Tsufeki\HmContainer\Exception\ParameterNotWiredException;
 
 /**
- * @covers \Tsufeki\HmContainer\ClassFactory
+ * @covers \Tsufeki\HmContainer\Factory\ClassFactory
  */
 class ClassFactoryTest extends TestCase
 {

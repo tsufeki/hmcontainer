@@ -1,6 +1,6 @@
 <?php
 
-namespace Tsufeki\HmContainer;
+namespace Tsufeki\HmContainer\Exception;
 
 use Psr\Container\ContainerExceptionInterface;
 

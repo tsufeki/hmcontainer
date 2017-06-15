@@ -4,6 +4,16 @@ namespace Tsufeki\HmContainer;
 
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Tsufeki\HmContainer\Exception\CircularDependencyException;
+use Tsufeki\HmContainer\Exception\LockedException;
+use Tsufeki\HmContainer\Exception\MixedMultiException;
+use Tsufeki\HmContainer\Exception\NotFoundException;
+use Tsufeki\HmContainer\Factory\AliasFactory;
+use Tsufeki\HmContainer\Factory\ClassFactory;
+use Tsufeki\HmContainer\Factory\FunctionFactory;
+use Tsufeki\HmContainer\Factory\LazyFactory;
+use Tsufeki\HmContainer\Factory\ValueFactory;
+use Tsufeki\HmContainer\Factory\Wiring;
 
 class Container implements MultiContainerInterface, LockableInterface
 {

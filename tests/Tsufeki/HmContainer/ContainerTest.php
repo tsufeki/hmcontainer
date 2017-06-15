@@ -4,14 +4,18 @@ namespace Tsufeki\HmContainer;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Tsufeki\HmContainer\Exception\CircularDependencyException;
+use Tsufeki\HmContainer\Exception\LockedException;
+use Tsufeki\HmContainer\Exception\MixedMultiException;
+use Tsufeki\HmContainer\Exception\NotFoundException;
 
 /**
  * @covers \Tsufeki\HmContainer\Container
  * @covers \Tsufeki\HmContainer\Optional
- * @covers \Tsufeki\HmContainer\CircularDependencyException
- * @covers \Tsufeki\HmContainer\LockedException
- * @covers \Tsufeki\HmContainer\MixedMultiException
- * @covers \Tsufeki\HmContainer\NotFoundException
+ * @covers \Tsufeki\HmContainer\Exception\CircularDependencyException
+ * @covers \Tsufeki\HmContainer\Exception\LockedException
+ * @covers \Tsufeki\HmContainer\Exception\MixedMultiException
+ * @covers \Tsufeki\HmContainer\Exception\NotFoundException
  */
 class ContainerTest extends TestCase
 {
