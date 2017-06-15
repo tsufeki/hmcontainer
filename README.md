@@ -38,7 +38,7 @@ $c->get("non-existent-key"); // throws NotFoundException
 $c->getOrDefault("non-existent-key", 5); // 5
 ```
 
-Container is locked during first `get()` or `lock()` call and no new items can
+Container is frozen during first `get()` or `freeze()` call and no new items can
 be added afterwards.
 
 ### Multi-valued keys

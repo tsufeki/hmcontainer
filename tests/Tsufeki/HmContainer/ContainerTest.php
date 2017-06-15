@@ -5,7 +5,7 @@ namespace Tsufeki\HmContainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Tsufeki\HmContainer\Exception\CircularDependencyException;
-use Tsufeki\HmContainer\Exception\LockedException;
+use Tsufeki\HmContainer\Exception\FrozenException;
 use Tsufeki\HmContainer\Exception\MixedMultiException;
 use Tsufeki\HmContainer\Exception\NotFoundException;
 
@@ -13,7 +13,7 @@ use Tsufeki\HmContainer\Exception\NotFoundException;
  * @covers \Tsufeki\HmContainer\Container
  * @covers \Tsufeki\HmContainer\Optional
  * @covers \Tsufeki\HmContainer\Exception\CircularDependencyException
- * @covers \Tsufeki\HmContainer\Exception\LockedException
+ * @covers \Tsufeki\HmContainer\Exception\FrozenException
  * @covers \Tsufeki\HmContainer\Exception\MixedMultiException
  * @covers \Tsufeki\HmContainer\Exception\NotFoundException
  */
@@ -120,38 +120,38 @@ class ContainerTest extends TestCase
         $c->get('id');
     }
 
-    public function test_locks()
+    public function test_freezes()
     {
         $c = new Container();
         $factory = $this->makeFactory(0, false);
 
-        $this->assertFalse($c->isLocked());
-        $c->lock();
+        $this->assertFalse($c->isFrozen());
+        $c->freeze();
 
-        $this->assertTrue($c->isLocked());
-        $this->expectException(LockedException::class);
+        $this->assertTrue($c->isFrozen());
+        $this->expectException(FrozenException::class);
         $c->set('id', $factory);
     }
 
-    public function test_locks_parent()
+    public function test_freezes_parent()
     {
         $parent = new Container();
         $c = new Container($parent);
 
-        $this->assertFalse($parent->isLocked());
-        $c->lock();
+        $this->assertFalse($parent->isFrozen());
+        $c->freeze();
 
-        $this->assertTrue($parent->isLocked());
+        $this->assertTrue($parent->isFrozen());
     }
 
-    public function test_locks_when_getting()
+    public function test_freezes_when_getting()
     {
         $c = new Container();
         $c->set('id', $this->makeFactory(42));
 
-        $this->assertFalse($c->isLocked());
+        $this->assertFalse($c->isFrozen());
         $c->get('id');
-        $this->assertTrue($c->isLocked());
+        $this->assertTrue($c->isFrozen());
     }
 
     public function test_gets_default_value()

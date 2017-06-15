@@ -5,7 +5,7 @@ namespace Tsufeki\HmContainer;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Tsufeki\HmContainer\Exception\CircularDependencyException;
-use Tsufeki\HmContainer\Exception\LockedException;
+use Tsufeki\HmContainer\Exception\FrozenException;
 use Tsufeki\HmContainer\Exception\MixedMultiException;
 use Tsufeki\HmContainer\Exception\NotFoundException;
 use Tsufeki\HmContainer\Factory\AliasFactory;
@@ -15,10 +15,10 @@ use Tsufeki\HmContainer\Factory\LazyFactory;
 use Tsufeki\HmContainer\Factory\ValueFactory;
 use Tsufeki\HmContainer\Factory\Wiring;
 
-class Container implements MultiContainerInterface, LockableInterface
+class Container implements MultiContainerInterface, FreezableInterface
 {
     /**
-     * @var ContainerInterface|MultiContainerInterface|LockableInterface|null
+     * @var ContainerInterface|MultiContainerInterface|FreezableInterface|null
      */
     private $parent;
 
@@ -40,7 +40,7 @@ class Container implements MultiContainerInterface, LockableInterface
     /**
      * @var bool
      */
-    private $locked;
+    private $frozen;
 
     /**
      * @var int
@@ -56,13 +56,13 @@ class Container implements MultiContainerInterface, LockableInterface
         $this->values = [];
         $this->factories = [];
         $this->multi = [];
-        $this->locked = false;
+        $this->frozen = false;
         $this->recursionCounter = 0;
     }
 
     public function __sleep()
     {
-        return ['parent', 'factories', 'multi', 'locked'];
+        return ['parent', 'factories', 'multi', 'frozen'];
     }
 
     public function __wakeup()
@@ -71,17 +71,17 @@ class Container implements MultiContainerInterface, LockableInterface
         $this->recursionCounter = 0;
     }
 
-    public function lock()
+    public function freeze()
     {
-        $this->locked = true;
-        if ($this->parent !== null && $this->parent instanceof LockableInterface) {
-            $this->parent->lock();
+        $this->frozen = true;
+        if ($this->parent !== null && $this->parent instanceof FreezableInterface) {
+            $this->parent->freeze();
         }
     }
 
-    public function isLocked(): bool
+    public function isFrozen(): bool
     {
-        return $this->locked;
+        return $this->frozen;
     }
 
     public function has($id): bool
@@ -103,7 +103,7 @@ class Container implements MultiContainerInterface, LockableInterface
             return $this->getOrDefault($id->getId(), $id->getDefault());
         }
 
-        $this->lock();
+        $this->freeze();
 
         if ($this->recursionCounter > count($this->factories)) {
             throw new CircularDependencyException($id);
@@ -137,7 +137,7 @@ class Container implements MultiContainerInterface, LockableInterface
      */
     public function getOrDefault(string $id, $default = null)
     {
-        $this->lock();
+        $this->freeze();
 
         if (!$this->has($id)) {
             return $default;
@@ -193,13 +193,13 @@ class Container implements MultiContainerInterface, LockableInterface
      *
      * @return $this
      *
-     * @throws LockedException
+     * @throws FrozenException
      * @throws MixedMultiException
      */
     public function set(string $id, FactoryInterface $factory, array $options = []): self
     {
-        if ($this->isLocked()) {
-            throw new LockedException();
+        if ($this->isFrozen()) {
+            throw new FrozenException();
         }
 
         if ($options['lazy'] ?? false) {
@@ -229,7 +229,7 @@ class Container implements MultiContainerInterface, LockableInterface
      *
      * @return $this
      *
-     * @throws LockedException
+     * @throws FrozenException
      * @throws MixedMultiException
      */
     public function setValue(string $id, $value, array $options = []): self
@@ -245,7 +245,7 @@ class Container implements MultiContainerInterface, LockableInterface
      *
      * @return $this
      *
-     * @throws LockedException
+     * @throws FrozenException
      * @throws MixedMultiException
      */
     public function setClass(string $class, string $realClass = null, array $options = [], array $manualDependencies = null): self
@@ -263,7 +263,7 @@ class Container implements MultiContainerInterface, LockableInterface
      *
      * @return $this
      *
-     * @throws LockedException
+     * @throws FrozenException
      * @throws MixedMultiException
      */
     public function setFunction(string $id, callable $function, array $options = [], array $manualDependencies = null): self
@@ -278,7 +278,7 @@ class Container implements MultiContainerInterface, LockableInterface
      *
      * @return $this
      *
-     * @throws LockedException
+     * @throws FrozenException
      * @throws MixedMultiException
      */
     public function setAlias(string $id, string $targetId, array $options = []): self
