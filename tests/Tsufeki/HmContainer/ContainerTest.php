@@ -1,9 +1,10 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace Tsufeki\HmContainer;
+namespace Tests\Tsufeki\HmContainer;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
+use Tsufeki\HmContainer\Container;
+use Tsufeki\HmContainer\Definition;
 use Tsufeki\HmContainer\Exception\CircularDependencyException;
 use Tsufeki\HmContainer\Exception\FrozenException;
 use Tsufeki\HmContainer\Exception\MixedMultiException;
@@ -11,7 +12,6 @@ use Tsufeki\HmContainer\Exception\NotFoundException;
 
 /**
  * @covers \Tsufeki\HmContainer\Container
- * @covers \Tsufeki\HmContainer\Optional
  * @covers \Tsufeki\HmContainer\Exception\CircularDependencyException
  * @covers \Tsufeki\HmContainer\Exception\FrozenException
  * @covers \Tsufeki\HmContainer\Exception\MixedMultiException
@@ -19,12 +19,12 @@ use Tsufeki\HmContainer\Exception\NotFoundException;
  */
 class ContainerTest extends TestCase
 {
-    private function makeFactory($value, $required = true)
+    private function makeDefinition($value, $required = true)
     {
-        $factory = $this->createMock(FactoryInterface::class);
+        $factory = $this->createMock(Definition::class);
         $factory
             ->expects($required ? $this->once() : $this->any())
-            ->method('create')
+            ->method('get')
             ->with($this->isInstanceOf(Container::class))
             ->willReturn($value);
 
@@ -34,7 +34,7 @@ class ContainerTest extends TestCase
     public function test_gets_value()
     {
         $c = new Container();
-        $c->set('id', $this->makeFactory(42));
+        $c->set('id', $this->makeDefinition(42));
 
         $this->assertTrue($c->has('id'));
         $this->assertSame(42, $c->get('id'));
@@ -44,50 +44,11 @@ class ContainerTest extends TestCase
     {
         $obj = new \stdClass();
         $c = new Container();
-        $c->set('id', $this->makeFactory($obj));
+        $c->set('id', $this->makeDefinition($obj));
 
         $this->assertSame($obj, $c->get('id'));
         $this->assertTrue($c->has('id'));
         $this->assertSame($obj, $c->get('id'));
-    }
-
-    public function test_gets_from_parent()
-    {
-        $parent = $this->createMock(ContainerInterface::class);
-        $parent
-            ->expects($this->once())
-            ->method('get')
-            ->with($this->equalTo('id'))
-            ->willReturn(42);
-        $parent
-            ->expects($this->once())
-            ->method('has')
-            ->with($this->equalTo('id'))
-            ->willReturn(true);
-
-        $c = new Container($parent);
-
-        $this->assertTrue($c->has('id'));
-        $this->assertSame(42, $c->get('id'));
-    }
-
-    public function test_doesnt_get_from_parent_when_has_own()
-    {
-        $parent = $this->createMock(ContainerInterface::class);
-        $parent
-            ->expects($this->never())
-            ->method('get');
-        $parent
-            ->expects($this->once())
-            ->method('has')
-            ->with($this->equalTo('id'))
-            ->willReturn(false);
-
-        $c = new Container($parent);
-        $c->set('id', $this->makeFactory(42));
-
-        $this->assertTrue($c->has('id'));
-        $this->assertSame(42, $c->get('id'));
     }
 
     public function test_throws_when_not_found()
@@ -99,31 +60,10 @@ class ContainerTest extends TestCase
         $c->get('id');
     }
 
-    public function test_throws_when_not_found_in_parent()
-    {
-        $parent = $this->createMock(ContainerInterface::class);
-        $parent
-            ->expects($this->once())
-            ->method('get')
-            ->with($this->equalTo('id'))
-            ->willThrowException(new NotFoundException());
-        $parent
-            ->expects($this->once())
-            ->method('has')
-            ->with($this->equalTo('id'))
-            ->willReturn(false);
-
-        $c = new Container($parent);
-
-        $this->assertFalse($c->has('id'));
-        $this->expectException(NotFoundException::class);
-        $c->get('id');
-    }
-
     public function test_freezes()
     {
         $c = new Container();
-        $factory = $this->makeFactory(0, false);
+        $factory = $this->makeDefinition(0, false);
 
         $this->assertFalse($c->isFrozen());
         $c->freeze();
@@ -133,21 +73,10 @@ class ContainerTest extends TestCase
         $c->set('id', $factory);
     }
 
-    public function test_freezes_parent()
-    {
-        $parent = new Container();
-        $c = new Container($parent);
-
-        $this->assertFalse($parent->isFrozen());
-        $c->freeze();
-
-        $this->assertTrue($parent->isFrozen());
-    }
-
     public function test_freezes_when_getting()
     {
         $c = new Container();
-        $c->set('id', $this->makeFactory(42));
+        $c->set('id', $this->makeDefinition(42));
 
         $this->assertFalse($c->isFrozen());
         $c->get('id');
@@ -157,7 +86,7 @@ class ContainerTest extends TestCase
     public function test_gets_default_value()
     {
         $c = new Container();
-        $c->set('id', $this->makeFactory(42));
+        $c->set('id', $this->makeDefinition(42));
 
         $this->assertSame(42, $c->getOrDefault('id', 53));
         $this->assertSame(53, $c->getOrDefault('not-existent', 53));
@@ -166,8 +95,8 @@ class ContainerTest extends TestCase
     public function test_replaces_values()
     {
         $c = new Container();
-        $c->set('id', $this->makeFactory(42, false));
-        $c->set('id', $this->makeFactory(53));
+        $c->set('id', $this->makeDefinition(42, false));
+        $c->set('id', $this->makeDefinition(53));
 
         $this->assertTrue($c->has('id'));
         $this->assertSame(53, $c->get('id'));
@@ -176,8 +105,8 @@ class ContainerTest extends TestCase
     public function test_gets_multi_values()
     {
         $c = new Container();
-        $c->set('id', $this->makeFactory(42), ['multi' => true]);
-        $c->set('id', $this->makeFactory(53), ['multi' => true]);
+        $c->set('id', $this->makeDefinition(42), true);
+        $c->set('id', $this->makeDefinition(53), true);
 
         $this->assertTrue($c->has('id'));
         $this->assertTrue($c->isMulti('id'));
@@ -187,59 +116,31 @@ class ContainerTest extends TestCase
     public function test_throws_when_mixed_multi_modes()
     {
         $c = new Container();
-        $factory1 = $this->makeFactory(0, false);
-        $factory2 = $this->makeFactory(0, false);
-        $c->set('id', $factory1, ['multi' => false]);
+        $factory1 = $this->makeDefinition(0, false);
+        $factory2 = $this->makeDefinition(0, false);
+        $c->set('id', $factory1, false);
 
         $this->expectException(MixedMultiException::class);
-        $c->set('id', $factory2, ['multi' => true]);
+        $c->set('id', $factory2, true);
     }
 
     public function test_throws_when_mixed_multi_modes_2()
     {
         $c = new Container();
-        $factory1 = $this->makeFactory(0, false);
-        $factory2 = $this->makeFactory(0, false);
-        $c->set('id', $factory1, ['multi' => true]);
+        $factory1 = $this->makeDefinition(0, false);
+        $factory2 = $this->makeDefinition(0, false);
+        $c->set('id', $factory1, true);
 
         $this->expectException(MixedMultiException::class);
-        $c->set('id', $factory2, ['multi' => false]);
-    }
-
-    public function test_merges_multi_with_parent()
-    {
-        $parent = $this->createMock(MultiContainerInterface::class);
-        $parent
-            ->expects($this->once())
-            ->method('get')
-            ->with($this->equalTo('id'))
-            ->willReturn([42, 43]);
-        $parent
-            ->expects($this->once())
-            ->method('has')
-            ->with($this->equalTo('id'))
-            ->willReturn(true);
-        $parent
-            ->expects($this->once())
-            ->method('isMulti')
-            ->with($this->equalTo('id'))
-            ->willReturn(true);
-
-        $c = new Container($parent);
-        $c->set('id', $this->makeFactory(53), ['multi' => true]);
-        $c->set('id', $this->makeFactory(54), ['multi' => true]);
-
-        $this->assertTrue($c->has('id'));
-        $this->assertTrue($c->isMulti('id'));
-        $this->assertSame([42, 43, 53, 54], $c->get('id'));
+        $c->set('id', $factory2, false);
     }
 
     public function test_sets_value()
     {
         $c = new Container();
         $c->setValue('x', 42);
-        $c->setValue('y', 53, ['multi' => true]);
-        $c->setValue('y', 54, ['multi' => true]);
+        $c->setValue('y', 53, true);
+        $c->setValue('y', 54, true);
 
         $this->assertSame(42, $c->get('x'));
         $this->assertSame([53, 54], $c->get('y'));
@@ -248,7 +149,7 @@ class ContainerTest extends TestCase
     public function test_sets_class()
     {
         $c = new Container();
-        $c->setClass('id', \stdClass::class, ['multi' => true]);
+        $c->setClass('id', \stdClass::class, true);
 
         $this->assertInstanceOf(\stdClass::class, $c->get('id')[0]);
     }
@@ -256,7 +157,7 @@ class ContainerTest extends TestCase
     public function test_sets_from_function()
     {
         $c = new Container();
-        $c->setFunction('id', function () { return 42; }, ['multi' => true]);
+        $c->setCallable('id', function () { return 42; }, [], true);
 
         $this->assertSame([42], $c->get('id'));
     }
@@ -265,7 +166,7 @@ class ContainerTest extends TestCase
     {
         $c = new Container();
         $c->setValue('x', 42);
-        $c->setAlias('y', 'x', ['multi' => true]);
+        $c->setAlias('y', 'x', true);
 
         $this->assertSame([42], $c->get('y'));
     }
@@ -284,8 +185,8 @@ class ContainerTest extends TestCase
     {
         $c = new Container();
         $c->setValue('x', 42);
-        $c->setClass('y', \stdClass::class, ['multi' => false]);
-        $c->setAlias('z', 'x', ['multi' => true]);
+        $c->setClass('y', \stdClass::class, false);
+        $c->setAlias('z', 'x', true);
         $oldObject = $c->get('y');
 
         $serialized = serialize($c);
@@ -299,19 +200,10 @@ class ContainerTest extends TestCase
         $this->assertNotSame($oldObject, $newObject);
     }
 
-    public function test_optional_values()
-    {
-        $c = new Container();
-        $c->set('id', $this->makeFactory(42));
-
-        $this->assertSame(42, $c->get(new Optional('id')));
-        $this->assertNull($c->get(new Optional('non-existent-id')));
-    }
-
     public function test_adds_lazy_item()
     {
         $c = new Container();
-        $c->set('id', $this->makeFactory(42), ['lazy' => true]);
+        $c->setLazy('id', $this->makeDefinition(42));
 
         $this->assertSame(42, $c->get('id')());
     }

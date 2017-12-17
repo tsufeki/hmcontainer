@@ -1,41 +1,26 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Tsufeki\HmContainer;
 
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
 use Tsufeki\HmContainer\Exception\CircularDependencyException;
+use Tsufeki\HmContainer\Exception\ClassNotFoundException;
 use Tsufeki\HmContainer\Exception\FrozenException;
 use Tsufeki\HmContainer\Exception\MixedMultiException;
 use Tsufeki\HmContainer\Exception\NotFoundException;
-use Tsufeki\HmContainer\Factory\AliasFactory;
-use Tsufeki\HmContainer\Factory\ClassFactory;
-use Tsufeki\HmContainer\Factory\FunctionFactory;
-use Tsufeki\HmContainer\Factory\LazyFactory;
-use Tsufeki\HmContainer\Factory\ValueFactory;
-use Tsufeki\HmContainer\Factory\Wiring;
+use Tsufeki\HmContainer\Exception\ParameterNotWiredException;
 
-class Container implements MultiContainerInterface, FreezableInterface
+class Container implements MultiContainerInterface
 {
     /**
-     * @var ContainerInterface|MultiContainerInterface|FreezableInterface|null
-     */
-    private $parent;
-
-    /**
-     * @var array
+     * @var mixed[]
      */
     private $values;
 
     /**
-     * @var FactoryInterface[][]
+     * @var Definition[]
      */
-    private $factories;
-
-    /**
-     * @var bool[]
-     */
-    private $multi;
+    private $definitions;
 
     /**
      * @var bool
@@ -47,22 +32,17 @@ class Container implements MultiContainerInterface, FreezableInterface
      */
     private $recursionCounter;
 
-    /**
-     * @param ContainerInterface|null $parent
-     */
-    public function __construct(ContainerInterface $parent = null)
+    public function __construct()
     {
-        $this->parent = $parent;
         $this->values = [];
-        $this->factories = [];
-        $this->multi = [];
+        $this->definitions = [];
         $this->frozen = false;
         $this->recursionCounter = 0;
     }
 
     public function __sleep()
     {
-        return ['parent', 'factories', 'multi', 'frozen'];
+        return ['definitions', 'frozen'];
     }
 
     public function __wakeup()
@@ -74,9 +54,6 @@ class Container implements MultiContainerInterface, FreezableInterface
     public function freeze()
     {
         $this->frozen = true;
-        if ($this->parent !== null && $this->parent instanceof FreezableInterface) {
-            $this->parent->freeze();
-        }
     }
 
     public function isFrozen(): bool
@@ -86,26 +63,14 @@ class Container implements MultiContainerInterface, FreezableInterface
 
     public function has($id): bool
     {
-        return isset($this->values[$id]) || isset($this->factories[$id])
-            || ($this->parent !== null && $this->parent->has($id));
+        return isset($this->values[$id]) || isset($this->definitions[$id]);
     }
 
-    /**
-     * @param string|Optional $id
-     *
-     * @return mixed
-     *
-     * @throws ContainerExceptionInterface
-     */
     public function get($id)
     {
-        if ($id instanceof Optional) {
-            return $this->getOrDefault($id->getId(), $id->getDefault());
-        }
-
         $this->freeze();
 
-        if ($this->recursionCounter > count($this->factories)) {
+        if ($this->recursionCounter > count($this->definitions)) {
             throw new CircularDependencyException($id);
         }
         $this->recursionCounter++;
@@ -115,12 +80,8 @@ class Container implements MultiContainerInterface, FreezableInterface
                 return $this->values[$id];
             }
 
-            if (isset($this->factories[$id])) {
-                return $this->values[$id] = $this->instantiate($id);
-            }
-
-            if ($this->parent !== null) {
-                return $this->parent->get($id);
+            if (isset($this->definitions[$id])) {
+                return $this->values[$id] = $this->definitions[$id]->get($this);
             }
 
             throw new NotFoundException($id);
@@ -134,6 +95,8 @@ class Container implements MultiContainerInterface, FreezableInterface
      * @param mixed  $default
      *
      * @return mixed
+     *
+     * @throws ContainerExceptionInterface
      */
     public function getOrDefault(string $id, $default = null)
     {
@@ -146,78 +109,42 @@ class Container implements MultiContainerInterface, FreezableInterface
         return $this->get($id);
     }
 
-    /**
-     * @param string $id
-     *
-     * @return mixed
-     */
-    private function instantiate($id)
+    public function isMulti(string $id): bool
     {
-        $value = [];
-        foreach ($this->factories[$id] as $factory) {
-            $value[] = $factory->create($this);
-        }
-
-        if ($this->multi[$id]) {
-            if ($this->parent !== null && $this->parent->has($id)) {
-                $value = array_merge($this->parent->get($id), $value);
-            }
-        } else {
-            $value = $value[0];
-        }
-
-        return $value;
-    }
-
-    public function isMulti(string $id)
-    {
-        if (isset($this->multi[$id])) {
-            return $this->multi[$id];
-        }
-
-        if ($this->parent !== null) {
-            if ($this->parent instanceof MultiContainerInterface) {
-                return $this->parent->isMulti($id);
-            }
-
-            return $this->parent->has($id) ? false : null;
-        }
-
-        return null;
+        return isset($this->definitions[$id]) && $this->definitions[$id] instanceof Definition\Multi;
     }
 
     /**
-     * @param string           $id
-     * @param FactoryInterface $factory
-     * @param array            $options Available options: 'multi', 'lazy'.
+     * @param string     $id
+     * @param Definition $definition
+     * @param bool       $multi
      *
      * @return $this
      *
      * @throws FrozenException
      * @throws MixedMultiException
      */
-    public function set(string $id, FactoryInterface $factory, array $options = []): self
+    public function set(string $id, Definition $definition, bool $multi = false): self
     {
         if ($this->isFrozen()) {
             throw new FrozenException();
         }
 
-        if ($options['lazy'] ?? false) {
-            $factory = new LazyFactory($factory);
-        }
-
-        $multi = (bool)($options['multi'] ?? false);
-        $currentMulti = $this->isMulti($id);
-        if ($currentMulti !== null && $currentMulti !== $multi) {
+        if ($this->has($id) && $multi !== $this->isMulti($id)) {
             throw new MixedMultiException($id);
         }
 
         if ($multi) {
-            $this->factories[$id][] = $factory;
+            if (!isset($this->definitions[$id])) {
+                $this->definitions[$id] = new Definition\Multi();
+            }
+
+            /** @var Definition\Multi $multiDefinition */
+            $multiDefinition = $this->definitions[$id];
+            $multiDefinition->add($definition);
         } else {
-            $this->factories[$id] = [$factory];
+            $this->definitions[$id] = $definition;
         }
-        $this->multi[$id] = $multi;
 
         return $this;
     }
@@ -225,64 +152,81 @@ class Container implements MultiContainerInterface, FreezableInterface
     /**
      * @param string $id
      * @param mixed  $value
-     * @param array  $options
+     * @param bool   $multi
      *
      * @return $this
      *
      * @throws FrozenException
      * @throws MixedMultiException
      */
-    public function setValue(string $id, $value, array $options = []): self
+    public function setValue(string $id, $value, bool $multi = false): self
     {
-        return $this->set($id, new ValueFactory($value), $options);
+        return $this->set($id, new Definition\Value($value), $multi);
     }
 
     /**
-     * @param string      $class
-     * @param string|null $realClass
-     * @param array       $options
-     * @param array|null  $manualDependencies
+     * @param string                     $class
+     * @param string|null                $realClass
+     * @param bool                       $multi
+     * @param (Definition|string|null)[] $arguments
      *
      * @return $this
      *
      * @throws FrozenException
      * @throws MixedMultiException
+     * @throws ParameterNotWiredException
+     * @throws ClassNotFoundException
      */
-    public function setClass(string $class, string $realClass = null, array $options = [], array $manualDependencies = null): self
+    public function setClass(string $class, string $realClass = null, bool $multi = false, array $arguments = []): self
     {
         $realClass = $realClass ?: $class;
 
-        return $this->set($class, new ClassFactory(new Wiring(), $realClass, $manualDependencies), $options);
+        return $this->set($class, new Definition\Class_($realClass, $arguments), $multi);
     }
 
     /**
-     * @param string     $id
-     * @param callable   $function
-     * @param array      $options
-     * @param array|null $manualDependencies
+     * @param string                $id
+     * @param callable              $callable
+     * @param bool                  $multi
+     * @param (Definition|string)[] $arguments
      *
      * @return $this
      *
      * @throws FrozenException
      * @throws MixedMultiException
      */
-    public function setFunction(string $id, callable $function, array $options = [], array $manualDependencies = null): self
+    public function setCallable(string $id, callable $callable, array $arguments, bool $multi = false): self
     {
-        return $this->set($id, new FunctionFactory(new Wiring(), $function, $manualDependencies), $options);
+        return $this->set($id, new Definition\Callable_($callable, $arguments), $multi);
     }
 
     /**
      * @param string $id
      * @param string $targetId
-     * @param array  $options
+     * @param bool   $multi
      *
      * @return $this
      *
      * @throws FrozenException
      * @throws MixedMultiException
      */
-    public function setAlias(string $id, string $targetId, array $options = []): self
+    public function setAlias(string $id, string $targetId, bool $multi = false): self
     {
-        return $this->set($id, new AliasFactory($targetId), $options);
+        return $this->set($id, new Definition\Reference($targetId), $multi);
+    }
+
+    /**
+     * @param string     $id
+     * @param Definition $definition
+     * @param bool       $multi
+     *
+     * @return $this
+     *
+     * @throws FrozenException
+     * @throws MixedMultiException
+     */
+    public function setLazy(string $id, Definition $definition, bool $multi = false): self
+    {
+        return $this->set($id, new Definition\Lazy($definition), $multi);
     }
 }
