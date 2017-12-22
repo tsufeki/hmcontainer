@@ -195,7 +195,7 @@ class Container implements MultiContainerInterface
      * @throws FrozenException
      * @throws MixedMultiException
      */
-    public function setCallable(string $id, callable $callable, array $arguments, bool $multi = false): self
+    public function setCallable(string $id, callable $callable, bool $multi = false, array $arguments = []): self
     {
         return $this->set($id, new Definition\Callable_($callable, $arguments), $multi);
     }

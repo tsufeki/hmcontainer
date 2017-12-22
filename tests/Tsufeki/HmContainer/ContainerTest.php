@@ -157,7 +157,7 @@ class ContainerTest extends TestCase
     public function test_sets_from_function()
     {
         $c = new Container();
-        $c->setCallable('id', function () { return 42; }, [], true);
+        $c->setCallable('id', function () { return 42; }, true);
 
         $this->assertSame([42], $c->get('id'));
     }
