@@ -4,6 +4,7 @@ namespace Tsufeki\HmContainer\Definition;
 
 use Psr\Container\ContainerInterface;
 use Tsufeki\HmContainer\Definition;
+use Tsufeki\HmContainer\Wiring\Wiring;
 
 final class Callable_ implements Definition
 {
@@ -18,16 +19,15 @@ final class Callable_ implements Definition
     private $arguments;
 
     /**
-     * @param callable              $callable
-     * @param (Definition|string)[] $arguments
+     * @param callable                   $callable
+     * @param (Definition|string|null)[] $arguments
      */
-    public function __construct(callable $callable, array $arguments = [])
+    public function __construct(callable $callable, array $arguments = [], Wiring $wiring = null)
     {
         $this->callable = $callable;
+        $reflection = $this->getReflection($callable);
 
-        $this->arguments = array_map(function ($def) {
-            return is_string($def) ? new Definition\Reference($def) : $def;
-        }, $arguments);
+        $this->arguments = ($wiring ?? new Wiring())->resolveArguments($reflection, $arguments);
     }
 
     public function get(ContainerInterface $container)
@@ -37,5 +37,26 @@ final class Callable_ implements Definition
         }, $this->arguments);
 
         return ($this->callable)(...$argumentValues);
+    }
+
+    private function getReflection($callable): \ReflectionFunctionAbstract
+    {
+        if (is_string($callable)) {
+            if (strpos($callable, '::') !== false) {
+                return new \ReflectionMethod($callable);
+            }
+
+            return new \ReflectionFunction($callable);
+        }
+
+        if (is_array($callable)) {
+            return new \ReflectionMethod(...$callable);
+        }
+
+        if ($callable instanceof \Closure) {
+            return new \ReflectionFunction($callable);
+        }
+
+        return new \ReflectionMethod($callable, '__invoke');
     }
 }
