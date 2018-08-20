@@ -3,6 +3,7 @@
 namespace Tsufeki\HmContainer\Definition;
 
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Tsufeki\HmContainer\Definition;
 
 final class Optional implements Definition
@@ -25,10 +26,10 @@ final class Optional implements Definition
 
     public function get(ContainerInterface $container)
     {
-        if ($container->has($this->key)) {
+        try {
             return $container->get($this->key);
+        } catch (NotFoundExceptionInterface $e) {
+            return $this->default;
         }
-
-        return $this->default;
     }
 }

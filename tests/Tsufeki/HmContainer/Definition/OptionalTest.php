@@ -5,6 +5,7 @@ namespace Tests\Tsufeki\HmContainer\Definition;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Tsufeki\HmContainer\Definition\Optional;
+use Tsufeki\HmContainer\Exception\NotFoundException;
 
 /**
  * @covers \Tsufeki\HmContainer\Definition\Optional
@@ -15,11 +16,6 @@ class OptionalTest extends TestCase
     {
         $value = new \stdClass();
         $c = $this->createMock(ContainerInterface::class);
-        $c
-            ->expects($this->once())
-            ->method('has')
-            ->with($this->equalTo('target'))
-            ->willReturn(true);
         $c
             ->expects($this->once())
             ->method('get')
@@ -36,12 +32,9 @@ class OptionalTest extends TestCase
         $c = $this->createMock(ContainerInterface::class);
         $c
             ->expects($this->once())
-            ->method('has')
+            ->method('get')
             ->with($this->equalTo('target'))
-            ->willReturn(false);
-        $c
-            ->expects($this->never())
-            ->method('get');
+            ->willThrowException(new NotFoundException());
 
         $optionalDefinition = new Optional('target', $value);
         $this->assertSame($value, $optionalDefinition->get($c));
