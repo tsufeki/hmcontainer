@@ -82,7 +82,7 @@ class Wiring
         foreach ($function->getParameters() as $param) {
             $arg = new Argument();
 
-            if ($param->isOptional()) {
+            if ($param->isDefaultValueAvailable()) {
                 $arg->optional = true;
                 $arg->default = $param->getDefaultValue();
             }
