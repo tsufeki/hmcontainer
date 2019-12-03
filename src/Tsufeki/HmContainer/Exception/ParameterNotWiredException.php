@@ -32,7 +32,7 @@ class ParameterNotWiredException extends \Exception implements ContainerExceptio
     private function formatFunction(ReflectionFunctionAbstract $function): string
     {
         $s = '';
-        if ($function instanceof ReflectionMethod && $function->getDeclaringClass()) {
+        if ($function instanceof ReflectionMethod) {
             $s .= $function->getDeclaringClass()->getName() . '::';
         }
 

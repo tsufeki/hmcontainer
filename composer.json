@@ -1,6 +1,6 @@
 {
     "name": "tsufeki/hmcontainer",
-    "description": "Hierarchical dependency injection container inspired by Angular",
+    "description": "dependency injection container",
     "license": "MIT",
     "authors": [
         {
@@ -9,16 +9,15 @@
         }
     ],
     "require": {
-        "php": ">=7.0",
+        "php": ">=7.1",
         "phpdocumentor/reflection-docblock": "^4.2.0",
         "phpdocumentor/type-resolver": "^0.4.0",
         "psr/container": "^1.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6.4",
-        "phpstan/phpstan": "^0.9",
-        "phpstan/phpstan-phpunit": "^0.9",
-        "php-coveralls/php-coveralls": "^2.0"
+        "phpunit/phpunit": "^7",
+        "phpstan/phpstan": "^0.11",
+        "phpstan/phpstan-phpunit": "^0.11"
     },
     "autoload": {
         "psr-4": {

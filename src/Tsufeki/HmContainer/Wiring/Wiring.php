@@ -33,7 +33,7 @@ class Wiring
         $result = [];
         $i = 0;
         foreach ($arguments as $name => $arg) {
-            $explicitArg = $explicitArguments[$i] ?? null;
+            $explicitArg = $explicitArguments[$name] ?? $explicitArguments[$i] ?? null;
             $result[] = $this->resolveArgument($function, $name, $arg, $explicitArg);
 
             $i++;
@@ -48,7 +48,7 @@ class Wiring
         Argument $arg,
         $explicitArg
     ): Definition {
-        if (is_object($explicitArg) && $explicitArg instanceof Definition) {
+        if ($explicitArg instanceof Definition) {
             return $explicitArg;
         }
 
@@ -88,8 +88,8 @@ class Wiring
             }
 
             $type = $param->getType();
-            if ($type !== null && !$type->isBuiltin()) {
-                $arg->key = (string)$type;
+            if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+                $arg->key = $type->getName();
             }
 
             $arguments[$param->getName()] = $arg;

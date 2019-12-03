@@ -5,3 +5,5 @@ includes:
 parameters:
     excludes_analyse:
         - %rootDir%/../../../tests/Tsufeki/HmContainer/Wiring/WiringTest.php
+    ignoreErrors:
+        - '#PHPDoc tag @throws with type Psr\\Container\\ContainerExceptionInterface is not subtype of Throwable#'

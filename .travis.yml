@@ -1,9 +1,10 @@
 language: php
 
 php:
-    - '7.0'
     - '7.1'
     - '7.2'
+    - '7.3'
+    - '7.4'
 
 install:
     - composer install --no-interaction
@@ -15,7 +16,4 @@ cache:
 script:
     - mkdir -p build/logs
     - ./vendor/bin/phpstan analyze --configuration=phpstan.neon --level=max --no-interaction --no-progress src/ tests/
-    - ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
-
-after_success:
-    - travis_retry php vendor/bin/php-coveralls -v
+    - php -derror_reporting=E_ALL ./vendor/bin/phpunit
