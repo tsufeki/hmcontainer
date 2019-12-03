@@ -89,7 +89,7 @@ class Wiring
 
             $type = $param->getType();
             if ($type !== null && !$type->isBuiltin()) {
-                $arg->key = (string)$type;
+                $arg->key = $type instanceof \ReflectionNamedType ? $type->getName() : (string)$type;
             }
 
             $arguments[$param->getName()] = $arg;
